@@ -8,62 +8,45 @@ const DEFAULT_STATE = {
   protein: [],
   fillings: [],
   toppings: [],
-  sides: [],
+  sides: []
 };
 
-function Form() {
+function Form({ addOrder }) {
   const [formState, setFormState] = useState(DEFAULT_STATE);
 
-  function handleSubmit() {
+  function handleSubmit(event) {
     event.preventDefault();
-    props.addOrder(formState);
-
-    setFormState({
-      ...DEFAULT_STATE,
-    });
+    addOrder(formState);
+    setFormState(DEFAULT_STATE);
     event.target.reset();
   }
 
-  function handleChange() {
+  function handleChange(event) {
     const itemType = event.target.name;
     const item = event.target.value;
 
-    if (formState[itemType].includes(item)) {
-      setFormState({
-        ...formState,
-        [itemType]: formState[itemType].filter((ingr) => ingr !== item),
-      });
-    } else {
-      setFormState({
-        ...formState,
-        [itemType]: formState[itemType].concat(item),
-      });
-    }
+    setFormState(prev => {
+      const items = prev[itemType];
+      const newItems = items.includes(item)
+        ? items.filter(i => i !== item)
+        : [...items, item];
+
+      return {
+        ...prev,
+        [itemType]: newItems
+      };
+    });
   }
 
   return (
     <div className="ui raised container segment">
       <h1 className="ui block header">Order Form</h1>
       <form className="ui form" id="order-form" onSubmit={handleSubmit}>
-        <ProteinForm
-          protein={formState.protein}
-          handleOnChange={handleChange}
-        />
-
-        <FillingForm
-          fillings={formState.fillings}
-          handleOnChange={handleChange}
-        />
-
-        <ToppingForm
-          toppings={formState.toppings}
-          handleOnChange={handleChange}
-        />
-
-        <SideForm sides={formState.sides} handleOnChange={handleChange} />
-
+        <ProteinForm protein={formState.protein} handleChange={handleChange} />
+        <FillingForm fillings={formState.fillings} handleChange={handleChange} />
+        <ToppingForm toppings={formState.toppings} handleChange={handleChange} />
+        <SideForm sides={formState.sides} handleChange={handleChange} />
         <br />
-
         <button className="ui blue big button" type="submit">
           Submit
         </button>
